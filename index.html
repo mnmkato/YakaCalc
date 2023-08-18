@@ -12,14 +12,27 @@
             color:white
         }
         form,#breakdown>p{
-            padding: 1rem;
+            padding: 0.5rem;
             background-color: rgb(81, 82, 46);
         }
-        
-
+        #tarrifs{
+            display: grid;
+            grid-template-columns: repeat(auto-fit,minmax(150px,1fr));
+        }
+        #tarrifs>div{
+            background-color: rgb(81, 82, 46);
+            margin: 0.5rem;
+            padding: 0.5rem;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
+    <header>
+        <h1>Yaka Units Calculator</h1>
+    </header>
+    <p>Rates and Q3 2023 Tarrifs</p>
+    <div id="tarrifs"></div>
     <div id="content">
         <form id="form" action="">
         <label for="amount">
@@ -37,6 +50,18 @@
     </div>
 </body>
 <script>
+    const NormalserviceFee = 3360;
+    const vat_percentage = 18;
+    const quarterlyRate = 805.0;
+
+    const tarrifs = document.getElementById("tarrifs")
+    tarrifs.appendChild(makeCards("Service Fee",`${NormalserviceFee} UGX`))
+    tarrifs.appendChild(makeCards("VAT Rate",`${vat_percentage}%`))
+    tarrifs.appendChild(makeCards("Lifeline Tarrif",`${250} UGX`))
+    tarrifs.appendChild(makeCards("Mid-Usage Tarrif",`${quarterlyRate} UGX`))
+    tarrifs.appendChild(makeCards("Cooking Tarrif",`${420} UGX`))
+    tarrifs.appendChild(makeCards("High-Usage Tarrif",`${quarterlyRate} UGX`))
+
     const form = document.getElementById("form");
     const units = document.getElementById("units");
     const breakdown = document.getElementById("breakdown");
@@ -50,8 +75,6 @@
         const firstPurchaseRadio = document.querySelector("input[name=firstPurchase]:checked");
         const firstPurchase = firstPurchaseRadio.value;
         
-        const vat_percentage = 18;
-        const quarterlyRate = 805.0;
         let serviceFee = 0;
         let lifelineUnits = 0;
         let otherunits = 0;
@@ -74,7 +97,7 @@
         otherunits = moneyAfterLifeline / quarterlyRate;
         let totalUnits = lifelineUnits + otherunits;
 
-        units.textContent = `Estimated yaka units ${totalUnits.toFixed(2)}`;
+        units.textContent = `Your yaka units are ${totalUnits.toFixed(2)}`;
 
         breakdown.innerHTML = "";
         breakdown.appendChild(makeP(`You pay ${amount_paid} UGX`));
@@ -85,7 +108,16 @@
         breakdown.appendChild(makeP(`You are left with ${moneyAfterLifeline.toFixed(0)}`));
         breakdown.appendChild(makeP(`This gets you ${otherunits.toFixed(2)} more units charged at Umeme's current quarterly rate of ${quarterlyRate} per unit`));
     });
-
+    function makeCards(title,value) {
+        const card = document.createElement("div");
+        const titleP = document.createElement("p");
+        titleP.textContent = title;
+        card.appendChild(titleP)
+        const valueP = document.createElement("p");
+        valueP.textContent = value;
+        card.appendChild(valueP)
+        return card
+    }
     function makeP(message) {
         const p = document.createElement("p");
         p.textContent = message;
