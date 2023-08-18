@@ -51,7 +51,7 @@
         const firstPurchase = firstPurchaseRadio.value;
         
         const vat_percentage = 18;
-        const quarterlyRate = 750.9;
+        const quarterlyRate = 805.0;
         let serviceFee = 0;
         let lifelineUnits = 0;
         let otherunits = 0;
@@ -74,7 +74,7 @@
         otherunits = moneyAfterLifeline / quarterlyRate;
         let totalUnits = lifelineUnits + otherunits;
 
-        units.textContent = `Your yaka units are ${totalUnits.toFixed(2)}`;
+        units.textContent = `Estimated yaka units ${totalUnits.toFixed(2)}`;
 
         breakdown.innerHTML = "";
         breakdown.appendChild(makeP(`You pay ${amount_paid} UGX`));
