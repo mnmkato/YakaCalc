@@ -7,8 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import tariffData from './tariffData.ts';
-import { Table, TableBody, TableCaption, TableCell, TableHeader, TableRow, } from "@/components/ui/table";
-import { Captions } from 'lucide-react';
+import { Table, TableBody, TableCell, TableHeader, TableRow, } from "@/components/ui/table";
 
 function App() {
   const [amountPaid, setAmountPaid] = useState<number>(10000);
@@ -36,10 +35,9 @@ function App() {
     let tier4Units = 0;
     let totalUnits = 0;
   
-
     //Deduct vat and service fee
     const vatPercentage = 0.18
-    const vatAmount = amountPaid * vatPercentage
+    const vatAmount = amount * vatPercentage
     const formattedVatAmount = Number(vatAmount.toFixed(2)).toLocaleString();
 
     const amountAfterVat = amountPaid - vatAmount
@@ -115,14 +113,14 @@ function App() {
     setInfoMessage(infoMessage);
   };
 
-  const calculateHistoryUnits = (amount: number, tariffs: any) => {
+  const calculateHistoryUnits = (amount: number, tariffs: any, isFirstPurchaseOfMonth: boolean ) => {
     const { lifeline, tier2, tier3, tier4 } = tariffs;
-    return calculateUnitsForAmount(amount, lifeline, tier2, tier3, tier4).totalUnits;
+    return calculateUnitsForAmount(amount, lifeline, tier2, tier3, tier4, isFirstPurchaseOfMonth).totalUnits;
   };
 
   const dataWithUnits = tariffData.map((entry) => ({
     ...entry,
-    totalUnits: calculateHistoryUnits(amountPaid, entry),
+    totalUnits: calculateHistoryUnits(amountPaid, entry, isFirstPurchaseOfMonth),
   }));
 
   useEffect(() => {
@@ -237,7 +235,7 @@ function App() {
                     return (
                       <div className="bg-white p-2 border rounded shadow-md text-sm">
                         <p className="font-bold">{data.quarter}</p>
-                        <p>Total Units: {data.totalUnits.toFixed(2)}</p>
+                        <p>Total Units: {data.totalUnits}</p>
                         <p>Lifeline Tariff: {data.lifeline} UGX</p>
                         <p>Tier 2 Tariff: {data.tier2} UGX</p>
                         <p>Tier 3 Tariff: {data.tier3} UGX</p>
