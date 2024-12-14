@@ -1,14 +1,36 @@
 import { useState, useEffect } from 'react';
 import './App.css';
+import { TrendingUp } from "lucide-react"
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AreaChart, Area, XAxis, CartesianGrid } from 'recharts';
+import {ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent} from "@/components/ui/chart"
+import { Card, CardDescription, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import tariffData from './tariffData.ts';
-import { Table, TableBody, TableCell, TableHeader, TableRow, } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableRow, } from "@/components/ui/table";
 
+const chartConfigStack = {
+  lifelineUnits: {
+  label: "lifeline Units",
+  color: "hsl(var(--chart-1))",
+},
+tier2Units: {
+  label: "tier2 Units",
+  color: "hsl(var(--chart-2))",
+},
+tier3Units: {
+  label: "tier3 Units",
+  color: "hsl(var(--chart-3))",
+},
+tier4Units: {
+  label: "tier4 Units",
+  color: "hsl(var(--chart-4))",
+},
+} satisfies ChartConfig
+  
 function App() {
   const [amountPaid, setAmountPaid] = useState<number>(10000);
   const [isFirstPurchaseOfMonth, setIsFirstPurchaseOfMonth] = useState<boolean>(true);
@@ -118,10 +140,20 @@ function App() {
     return calculateUnitsForAmount(amount, lifeline, tier2, tier3, tier4, isFirstPurchaseOfMonth).totalUnits;
   };
 
-  const dataWithUnits = tariffData.map((entry) => ({
-    ...entry,
-    totalUnits: calculateHistoryUnits(amountPaid, entry, isFirstPurchaseOfMonth),
-  }));
+  const dataWithUnits = tariffData.map((entry) => {
+    const { quarter,lifeline, tier2, tier3, tier4 } = entry;
+    const result = calculateUnitsForAmount(amountPaid, lifeline, tier2, tier3, tier4, isFirstPurchaseOfMonth);
+  
+    return {
+      ...entry,
+      lifelineUnits: result.lifelineUnits,
+      tier2Units: result.tier2Units,
+      tier3Units: result.tier3Units,
+      tier4Units: result.tier4Units,
+      totalUnits: result.totalUnits,
+    };
+  });
+  
 
   useEffect(() => {
     calculateUnits();
@@ -131,8 +163,8 @@ function App() {
     <div className="flex flex-col md:flex-row justify-center items-center gap-6 p-4">
       {/* Main Section */}
       <Card className="w-full max-w-lg bg-[#FDFDFD] text-[#20210a]">
-        <CardHeader className="bg-[#57612f] text-[#fdfdfd]">
-          <CardTitle className="text-2xl font-bold text-center">YAKA Electrical Units Calculator</CardTitle>
+        <CardHeader className="bg-[#57612f] text-[#fdfdfd] rounded-t-lg">
+          <CardTitle className="text-2xl font-bold text-center">YAKA Units Calculator</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6 p-6">
           <div className="space-y-2">
@@ -151,12 +183,20 @@ function App() {
               id="isFirstPurchaseOfMonth"
               checked={isFirstPurchaseOfMonth}
               onCheckedChange={setIsFirstPurchaseOfMonth}
-              className="bg-[#a7b033]"
+              className={`${
+                isFirstPurchaseOfMonth ? 'bg-[#57612f]' : 'bg-[#a7b033]'
+              }`}
             />
             <Label htmlFor="isFirstPurchaseOfMonth" className="text-[#20210a]">First Purchase of the Month</Label>
           </div>
           <Button onClick={calculateUnits} className="w-full bg-[#57612f] text-[#fdfdfd] hover:bg-[#a7b033]">Calculate Units</Button>
-   
+      </CardContent>
+      </Card>
+      <Card className="w-full max-w-lg bg-[#FDFDFD] text-[#20210a]">
+      <CardHeader className="bg-[#57612f] text-[#fdfdfd] rounded-t-lg">
+          <CardTitle className="text-2xl font-bold text-center">Results</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6 p-6">
           {/* Info Message */}
           {infoMessage && (
                 <div className="mt-4 text-yellow-600 font-semibold">
@@ -167,42 +207,37 @@ function App() {
           {result && (<>
             <div className="mt-6 space-y-4">
               <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableCell colSpan={2} className="text-lg font-semibold text-[#20210a]">Results:</TableCell>
-                  </TableRow>
-                </TableHeader>
                 <TableBody>
                   <TableRow>
                     <TableCell className="text-left">18% VAT:</TableCell>
                     <TableCell className="text-right">{result.vatAmount} UGX</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="text-left">Amount after VAT:</TableCell>
+                    <TableCell className="text-left">After VAT:</TableCell>
                     <TableCell className="text-right">{result.amountAfterVat} UGX</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="text-left">Amount after 3,360 UGX Service Fee:</TableCell>
+                    <TableCell className="text-left">After 3,360 UGX Service Fee:</TableCell>
                     <TableCell className="text-right">{result.amountAfterServiceFee} UGX</TableCell>
                   </TableRow>
                   <TableRow>
                   {isFirstPurchaseOfMonth ? (
-                      <TableCell className="text-left">Units between 0-15 at 250 UGX:</TableCell>
+                      <TableCell className="text-left">Units 0-15 @ 250 UGX:</TableCell>
                     ) : (
-                      <TableCell className="text-left">Units between 0-15 at 796.4 UGX:</TableCell>
+                      <TableCell className="text-left">Units 0-15 @ 796.4 UGX:</TableCell>
                     )}
                     <TableCell className="text-right">{result.lifelineUnits}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="text-left">Units between 16-80 at 796.4 UGX each:</TableCell>
+                    <TableCell className="text-left">Units 16-80 @ 796.4 UGX each:</TableCell>
                     <TableCell className="text-right">{result.tier2Units}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="text-left">Units between 81-150 at 412.0 UGX each:</TableCell>
+                    <TableCell className="text-left">Units 81-150 @ 412.0 UGX each:</TableCell>
                     <TableCell className="text-right">{result.tier3Units}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="text-left">Units above 150 at 796.4 UGX each:</TableCell>
+                    <TableCell className="text-left">Units 150+ @ 796.4 UGX each:</TableCell>
                     <TableCell className="text-right">{result.tier4Units}</TableCell>
                   </TableRow>
                   <TableRow>
@@ -218,43 +253,99 @@ function App() {
       </Card>
       {/* Chart Section */}
       {result && (
-        <Card className="w-full max-w-lg bg-[#FDFDFD] text-[#20210a] mt-8">
-        <CardHeader className="bg-[#57612f] text-[#fdfdfd]">
-          <CardTitle className="text-2xl font-bold text-center">Value of {amountPaid.toLocaleString()} UGX in Units Over Time</CardTitle>
-        </CardHeader>
+        <Card className="w-full max-w-lg bg-[#FDFDFD] text-[#20210a]">
+        <CardHeader className="bg-[#57612f] text-[#fdfdfd]  rounded-t-lg">
+          <CardTitle className="text-2xl font-bold text-center">YAKA units trend</CardTitle>
+          </CardHeader>
+          
         <CardContent className="p-6">
-          <ResponsiveContainer width="100%" height={400}>
-            <AreaChart data={dataWithUnits}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="quarter" />
-              <YAxis />
-              <Tooltip
-                content={({ active, payload }) => {
-                  if (active && payload && payload.length) {
-                    const data = payload[0].payload;
-                    return (
-                      <div className="bg-white p-2 border rounded shadow-md text-sm">
-                        <p className="font-bold">{data.quarter}</p>
-                        <p>Total Units: {data.totalUnits}</p>
-                        <p>Lifeline Tariff: {data.lifeline} UGX</p>
-                        <p>Tier 2 Tariff: {data.tier2} UGX</p>
-                        <p>Tier 3 Tariff: {data.tier3} UGX</p>
-                        <p>Tier 4 Tariff: {data.tier4} UGX</p>
+        <CardDescription>The number of units worth {amountPaid.toLocaleString()} UGX tracked  over time</CardDescription>
+       
+          <ChartContainer config={chartConfigStack}>
+            <AreaChart 
+            accessibilityLayer
+            data={dataWithUnits}
+            margin={{
+              left: 12,
+              right: 12,
+            }}
+          >
+              <CartesianGrid vertical={false} strokeDasharray="3 3" />
+              <XAxis 
+              dataKey="quarter"
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+              />
+             <ChartTooltip
+              content={
+                <ChartTooltipContent
+                  className="w-[180px]"
+                  formatter={(value, name, item, index) => (
+                    <>
+                      <div
+                        className="h-2.5 w-2.5 shrink-0 rounded-[2px] bg-[--color-bg]"
+                        style={
+                          {
+                            "--color-bg": `var(--color-${name})`,
+                          } as React.CSSProperties
+                        }
+                      />
+                      {chartConfigStack[name as keyof typeof chartConfigStack]?.label || name}
+                      <div className="ml-auto flex items-baseline gap-0.5 font-mono font-medium tabular-nums text-foreground">
+                        {value}
                       </div>
-                    );
-                  }
-                  return null;
-                }}
+                      {/* Add total after the last item */}
+                      {index === 3 && (
+                        <div className="mt-1.5 flex basis-full items-center border-t pt-1.5 text-xs font-medium text-foreground">
+                          Total
+                          <div className="ml-auto flex items-baseline gap-0.5 font-mono font-medium tabular-nums text-foreground">
+                            {item.payload.totalUnits}
+                            <span className="font-normal text-muted-foreground">units</span>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+                />
+              }
+              cursor={false}
+            />
+
+              <Area
+                type="natural"
+                dataKey="lifelineUnits"
+                stroke="var(--color-lifelineUnits"
+                fill="var(--color-lifelineUnits"
+                fillOpacity={0.4}
+                stackId="a"
               />
               <Area
-                type="monotone"
-                dataKey="totalUnits"
-                stroke="#57612f"
-                fill="#a7b033"
-                fillOpacity={0.6}
+                type="natural"
+                dataKey="tier2Units"
+                stroke="var(--color-tier2Units)"
+                fill="var(--color-tier2Units)"
+                fillOpacity={0.4}
+                stackId="a"
+              />
+              <Area
+                type="natural"
+                dataKey="tier3Units"
+                stroke="var(--color-tier3Units)"
+                fill="var(--color-tier3Units)"
+                fillOpacity={0.4}
+                stackId="a"
+              />
+              <Area
+                type="natural"
+                dataKey="tier4Units"
+                stroke="var(--color-tier4Units)"
+                fill="var(--color-tier4Units)"
+                fillOpacity={0.4}
+                stackId="a"
               />
             </AreaChart>
-          </ResponsiveContainer>
+          </ChartContainer>
         </CardContent>
       </Card>
       )}
@@ -263,3 +354,4 @@ function App() {
 }
 
 export default App;
+

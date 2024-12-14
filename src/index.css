@@ -25,11 +25,17 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  background: rgb(34,193,195);
+  background: linear-gradient(0deg, rgba(34,193,195,1) 0%, rgba(253,187,45,1) 100%);
 }
 
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
+}
+
+.text-right {
+  padding-left: 0 !important;
 }
 
 @media (prefers-color-scheme: light) {
@@ -47,7 +53,7 @@ h1 {
     --card-foreground: 240 10% 3.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
-    --primary: 240 5.9% 10%;
+    --primary: 87 23% 24%;
     --primary-foreground: 0 0% 98%;
     --secondary: 240 4.8% 95.9%;
     --secondary-foreground: 240 5.9% 10%;
