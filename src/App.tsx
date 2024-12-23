@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import './App.css';
-import { TrendingUp } from "lucide-react"
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -135,13 +134,8 @@ function App() {
     setInfoMessage(infoMessage);
   };
 
-  const calculateHistoryUnits = (amount: number, tariffs: any, isFirstPurchaseOfMonth: boolean ) => {
-    const { lifeline, tier2, tier3, tier4 } = tariffs;
-    return calculateUnitsForAmount(amount, lifeline, tier2, tier3, tier4, isFirstPurchaseOfMonth).totalUnits;
-  };
-
   const dataWithUnits = tariffData.map((entry) => {
-    const { quarter,lifeline, tier2, tier3, tier4 } = entry;
+    const { lifeline, tier2, tier3, tier4 } = entry;
     const result = calculateUnitsForAmount(amountPaid, lifeline, tier2, tier3, tier4, isFirstPurchaseOfMonth);
   
     return {
